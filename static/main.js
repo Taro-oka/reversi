@@ -2,24 +2,18 @@ const EMPTY = 0;
 const LIGHT = 1;
 const DARK = 2;
 
-const INITIAL_BOARD = [
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, LIGHT, DARK, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, DARK, LIGHT, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-  [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-];
-
 const board = document.getElementById("board");
 
 async function showBoard() {
+  const turnCount = 0;
+  const response = await fetch(`api/games/latest/turns/${turnCount}`);
+  const responseBody = await response.json();
+  const _board = responseBody.board;
+
   while (board.firstChild) {
     board.removeChild(board.firstChild);
   }
-  INITIAL_BOARD.forEach((row) => {
+  _board.forEach((row) => {
     row.forEach((value) => {
       const newSquare = document.createElement("div");
       if (value > 0) {

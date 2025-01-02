@@ -2,18 +2,18 @@ const EMPTY = 0;
 const LIGHT = 1;
 const DARK = 2;
 
-const board = document.getElementById("board");
+const boardElement = document.getElementById("board");
 
 async function showBoard() {
   const turnCount = 0;
   const response = await fetch(`api/games/latest/turns/${turnCount}`);
   const responseBody = await response.json();
-  const _board = responseBody.board;
+  const board = responseBody.board;
 
-  while (board.firstChild) {
-    board.removeChild(board.firstChild);
+  while (boardElement.firstChild) {
+    boardElement.removeChild(boardElement.firstChild);
   }
-  _board.forEach((row) => {
+  board.forEach((row) => {
     row.forEach((value) => {
       const newSquare = document.createElement("div");
       if (value > 0) {
@@ -22,7 +22,7 @@ async function showBoard() {
         newSquare.appendChild(stone);
       }
       newSquare.classList.add("square");
-      board.appendChild(newSquare);
+      boardElement.appendChild(newSquare);
     });
   });
 }

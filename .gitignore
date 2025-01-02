@@ -1,0 +1,8 @@
+# node_modules ディレクトリを無視
+node_modules/
+
+# dist ディレクトリを無視
+dist/
+
+# bin ディレクトリを無視
+bin/

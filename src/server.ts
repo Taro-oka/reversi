@@ -66,6 +66,18 @@ app.post("/api/games", async (req, res) => {
         .map(() => "(?, ?, ?, ?)")
         .join(", ");
 
+    const squareInsertValues: any[] = [];
+    INITIAL_BOARD.forEach((line, y) => {
+      line.forEach((disc, x) => {
+        squareInsertValues.push(turnId);
+        squareInsertValues.push(x);
+        squareInsertValues.push(y);
+        squareInsertValues.push(disc);
+      });
+    });
+
+    await conn.execute(squareInsertSql, squareInsertValues);
+
     await conn.commit();
   } catch (e) {
     console.error(e);

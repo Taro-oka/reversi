@@ -24,6 +24,11 @@ async function showBoard() {
         const color = square === DARK ? "dark" : "light";
         stoneElement.className = `stone ${color}`;
         squareElement.appendChild(stoneElement);
+      } else {
+        squareElement.addEventListener("click", () => {
+          console.log("clicked");
+          // ここでregisterTurnを呼ぶ
+        });
       }
       boardElement.appendChild(squareElement);
     });
@@ -36,6 +41,25 @@ async function registerGame() {
   });
   // const data = await res.json();
   console.log(res);
+}
+
+async function registerTurn(turnCount, disc, x, y) {
+  const requestBody = {
+    turnCount,
+    move: {
+      disc,
+      x,
+      y,
+    },
+  };
+
+  await fetch("/api/games/latest/turns", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  });
 }
 
 async function main() {

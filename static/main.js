@@ -13,16 +13,19 @@ async function showBoard() {
   while (boardElement.firstChild) {
     boardElement.removeChild(boardElement.firstChild);
   }
+
   board.forEach((row) => {
-    row.forEach((value) => {
-      const newSquare = document.createElement("div");
-      if (value > 0) {
-        const stone = document.createElement("div");
-        stone.classList.add(value === 1 ? "light" : "dark", "stone");
-        newSquare.appendChild(stone);
+    row.forEach((square) => {
+      const squareElement = document.createElement("div");
+      squareElement.className = "square";
+
+      if (square !== EMPTY) {
+        const stoneElement = document.createElement("div");
+        const color = square === DARK ? "dark" : "light";
+        stoneElement.className = `stone ${color}`;
+        squareElement.appendChild(stoneElement);
       }
-      newSquare.classList.add("square");
-      boardElement.appendChild(newSquare);
+      boardElement.appendChild(squareElement);
     });
   });
 }

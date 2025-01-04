@@ -109,6 +109,8 @@ app.get("/api/games/latest/turns/:turnCount", async (req, res) => {
     );
 
     const squares = squareSelectResult[0];
+
+    
     const board = Array.from(Array(8)).map((_) => Array.from(Array(8)));
     squares.forEach((s) => {
       board[s.y][s.x] = s.disc;

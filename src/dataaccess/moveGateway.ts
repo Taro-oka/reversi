@@ -8,7 +8,7 @@ export class MoveGateway {
     disc: number,
     x: number,
     y: number
-  ) {
+  ): Promise<MoveRecord> {
     const moveInsertResult = await conn.execute<mysql.ResultSetHeader>(
       "insert into moves (turn_id, disc, x, y) values (?, ?, ?, ?)",
       [turnId, disc, x, y]

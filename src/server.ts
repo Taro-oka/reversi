@@ -5,6 +5,7 @@ import mysql from "mysql2/promise";
 import { GameGateway } from "./dataaccess/gameGateway";
 import { TurnGateway } from "./dataaccess/turnGateway";
 import { MoveGateway } from "./dataaccess/moveGateway";
+import { SquareGateway } from "./dataaccess/squareGateway";
 
 const EMPTY = 0;
 const LIGHT = 1;
@@ -30,6 +31,7 @@ app.use(express.json()); // req.body内に受け取ったjsonを格納できる�
 const gameGateway = new GameGateway();
 const turnGateway = new TurnGateway();
 const moveGateway = new MoveGateway();
+const squareGateway = new SquareGateway();
 
 app.get("/api/hello", async (req, res) => {
   res.json({
@@ -52,29 +54,7 @@ app.post("/api/games", async (req, res) => {
       DARK,
       now
     );
-
-    const squareCount = INITIAL_BOARD.map((line) => line.length).reduce(
-      (acc, cur) => acc + cur,
-      0
-    );
-
-    const squareInsertSql =
-      "insert into squares (turn_id, x, y, disc) values" +
-      Array.from(Array(squareCount))
-        .map(() => "(?, ?, ?, ?)")
-        .join(", ");
-
-    const squareInsertValues: any[] = [];
-    INITIAL_BOARD.forEach((line, y) => {
-      line.forEach((disc, x) => {
-        squareInsertValues.push(turnRecord.id);
-        squareInsertValues.push(x);
-        squareInsertValues.push(y);
-        squareInsertValues.push(disc);
-      });
-    });
-
-    await conn.execute(squareInsertSql, squareInsertValues);
+    await squareGateway.insertAll(conn, turnRecord.id, INITIAL_BOARD);
 
     await conn.commit();
   } catch (e) {
@@ -103,16 +83,11 @@ app.get("/api/games/latest/turns/:turnCount", async (req, res) => {
     );
     if (!turnRecord) throw new Error("Turn not found");
 
-    const squareSelectResult = await conn.execute<mysql.RowDataPacket[]>(
-      "select id, turn_id, x, y, disc from squares where turn_id = ?",
-      [turnRecord.id]
-    );
+    const squareRecords = await squareGateway.findByTurnId(conn, turnRecord.id);
+    if (!squareRecords) throw new Error("Squares not found");
 
-    const squares = squareSelectResult[0];
-
-    
     const board = Array.from(Array(8)).map((_) => Array.from(Array(8)));
-    squares.forEach((s) => {
+    squareRecords.forEach((s) => {
       board[s.y][s.x] = s.disc;
     });
 
@@ -150,14 +125,14 @@ app.post("/api/games/latest/turns", async (req, res) => {
     );
     if (!prevTurnRecord) throw new Error("turn not found");
 
-    const squareSelectResult = await conn.execute<mysql.RowDataPacket[]>(
-      "select id, turn_id, x, y, disc from squares where turn_id = ?",
-      [prevTurnRecord.id]
+    const squareRecords = await squareGateway.findByTurnId(
+      conn,
+      prevTurnRecord.id
     );
+    if (!squareRecords) throw new Error("squares not found");
 
-    const squares = squareSelectResult[0];
     const board = Array.from(Array(8)).map((_) => Array.from(Array(8)));
-    squares.forEach((s) => {
+    squareRecords.forEach((s) => {
       board[s.y][s.x] = s.disc;
     });
 
@@ -174,28 +149,7 @@ app.post("/api/games/latest/turns", async (req, res) => {
       nextDisc,
       now
     );
-
-    const squareCount = board
-      .map((line) => line.length)
-      .reduce((acc, cur) => acc + cur, 0);
-
-    const squareInsertSql =
-      "insert into squares (turn_id, x, y, disc) values" +
-      Array.from(Array(squareCount))
-        .map(() => "(?, ?, ?, ?)")
-        .join(", ");
-
-    const squareInsertValues: any[] = [];
-    board.forEach((line, y) => {
-      line.forEach((disc, x) => {
-        squareInsertValues.push(turnRecord.id);
-        squareInsertValues.push(x);
-        squareInsertValues.push(y);
-        squareInsertValues.push(disc);
-      });
-    });
-
-    await conn.execute(squareInsertSql, squareInsertValues);
+    await squareGateway.insertAll(conn, turnRecord.id, board);
     await moveGateway.insert(conn, turnRecord.id, disc, x, y);
 
     await conn.commit();

@@ -3,9 +3,9 @@ import mysql from "mysql2/promise";
 export async function connectMySql() {
   return await mysql.createConnection({
     host: "localhost",
-    port: 3307,
+    port: 3306,
     database: "reversi",
-    user: "reversi",
-    password: "password",
+    user: "root",
+    password: "taromysql",
   });
 }
